@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Podcast Vozes da Resistência</title>
+    <style>
+        /* ================= ESTILOS VISUAIS ================= */
+        :root {
+            --cor-primaria: #1a1a1a;
+            --cor-secundaria: #d97706; /* Um tom de laranja/dourado escuro */
+            --cor-fundo: #f3f4f6;
+            --cor-texto: #374151;
+            --cor-texto-claro: #ffffff;
+        }
+
+        body {
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: var(--cor-fundo);
+            color: var(--cor-texto);
+        }
+
+        /* Cabeçalho */
+        header {
+            background-color: var(--cor-primaria);
+            color: var(--cor-texto-claro);
+            text-align: center;
+            padding: 50px 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 2.2rem;
+            color: var(--cor-secundaria);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        header p {
+            margin-top: 15px;
+            font-size: 1.2rem;
+            font-weight: 300;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        /* Grid de Cards */
+        .container {
+            max-width: 1200px;
+            margin: 40px auto;
+            padding: 0 20px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 30px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            cursor: pointer;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+        }
+
+        .card img {
+            width: 100%;
+            height: 280px;
+            object-fit: cover;
+            border-bottom: 4px solid var(--cor-secundaria);
+        }
+
+        .card-nome {
+            padding: 15px 20px 5px 20px;
+            text-align: center;
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: var(--cor-primaria);
+            margin: 0;
+        }
+
+        .card-turma {
+            padding: 0 20px 20px 20px;
+            text-align: center;
+            font-size: 0.9rem;
+            color: #6b7280;
+            margin: 0;
+            font-style: italic;
+        }
+
+        /* Janela Modal (Flutuante) */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            box-sizing: border-box;
+            backdrop-filter: blur(5px);
+        }
+
+        .modal-box {
+            background-color: white;
+            border-radius: 16px;
+            width: 100%;
+            max-width: 700px;
+            max-height: 90vh;
+            overflow-y: auto;
+            position: relative;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .btn-fechar {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            background: rgba(0,0,0,0.6);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 36px;
+            height: 36px;
+            font-size: 20px;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 10;
+            transition: background 0.2s;
+        }
+
+        .btn-fechar:hover {
+            background: rgba(0,0,0,0.9);
+        }
+
+        .modal-imagem {
+            width: 100%;
+            height: 350px;
+            object-fit: cover;
+        }
+
+        .modal-conteudo {
+            padding: 30px;
+        }
+
+        .modal-titulo {
+            margin: 0 0 15px 0;
+            font-size: 2rem;
+            color: var(--cor-secundaria);
+        }
+
+        .modal-texto {
+            font-size: 1.1rem;
+            line-height: 1.6;
+            margin-bottom: 25px;
+            white-space: pre-line; /* Mantém as quebras de linha perfeitas no texto */
+        }
+
+        /* Player de Áudio Customizado */
+        .area-player {
+            background: #fafafa; /* Um fundo um pouco mais claro para destacar */
+            padding: 25px;
+            border-radius: 12px;
+            border-left: 5px solid var(--cor-secundaria); /* Cor laranja para dar mais destaque */
+            display: flex;
+            flex-direction: column;
+            align-items: center; /* Centraliza o conteúdo horizontalmente */
+            box-shadow: inset 0 2px 5px rgba(0,0,0,0.05); /* Sombra interna sutil */
+        }
+        
+        .area-player p {
+            margin-top: 0;
+            margin-bottom: 15px;
+            font-weight: bold;
+            color: var(--cor-primaria);
+            font-size: 1.1rem;
+        }
+
+        .area-player iframe {
+            width: 100%;
+            max-width: 500px; /* Impede que o player fique esticado demais nas laterais */
+            height: 140px; /* Mais "aberto" para caber a interface do Google Drive perfeitamente */
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15); /* Sombra elegante no player */
+            background-color: white; /* Fundo branco caso a internet demore a carregar */
+        }
+
+    </style>
+</head>
+<body>
+
+    <!-- Cabeçalho -->
+    <header>
+        <h1>Podcast "Vozes da Resistência"</h1>
+        <p>Um projeto da diversidade étnica e racial.<br>Ouça as vozes das personalidades que marcaram a resistência negra ao longo da História.</p>
+    </header>
+
+    <!-- Área onde os cards vão aparecer -->
+    <main class="container" id="grid-cards">
+        <!-- O JavaScript vai injetar os cards aqui automaticamente -->
+    </main>
+
+    <!-- A Janela Modal (Invisível até alguém clicar) -->
+    <div class="modal-overlay" id="modal">
+        <div class="modal-box">
+            <button class="btn-fechar" onclick="fecharModal()">✕</button>
+            <img src="" alt="" class="modal-imagem" id="modal-img">
+            <div class="modal-conteudo">
+                <h2 class="modal-titulo" id="modal-titulo">Nome</h2>
+                <div class="modal-texto" id="modal-texto">Apresentação vai aqui.</div>
+                
+                <div class="area-player">
+                    <p>▶️ Ouça o episódio:</p>
+                    <!-- Player adaptado e centralizado -->
+                    <iframe id="modal-audio" src="" frameborder="0" allow="autoplay"></iframe>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        /* ================= ÁREA DE EDIÇÃO DO PROFESSOR ================= */
+        // Aqui você adiciona as personalidades. Basta copiar o formato e colar um embaixo do outro!
+        
+        const personalidades = [
+            {
+                nome: "Adelina, a Charuteira",
+                turma: "Entrevistado pelo 8º ano C",
+                imagem: "https://almapreta.com.br/images/2023/11/Adelina-Charuteira.jpg", 
+                texto: `Foi uma escrava e ativista do movimento abolicionista em São Luís no Maranhão, era filha de uma mãe escravizada e um pai senhor de escravizados (que prometeu a sua liberdade aos 17 anos, mas não cumpriu a promessa). Como escrava de ganho, ela vendia charutos avulsos pela cidade antes de se juntar ao movimento "clube dos mortos". Ouça sua história, através da entrevista realizada pelo 8C com Ester, Laisla e Laira, clicando no player abaixo.`,
+                linkDrive: "https://drive.google.com/file/d/1rvTfFvpd8QsgBF0hR7ykroenllQIg8XQ/view?usp=drive_link"
+            },
+            {
+                nome: "Maria Firmina dos Reis",
+                turma: "Entrevistado pelo 8º ano B",
+                imagem: "https://ichef.bbci.co.uk/ace/ws/640/cpsprodpb/44F1/production/_113394671_fd3e2824-eb77-400b-93b8-54a801acb13a.jpg.webp",
+                texto: `Maria Firmina dos Reis foi uma escritora negra brasileira do século XIX que, por meio de sua literatura, denunciou a escravidão e deu voz à população negra, tornando-se um importante símbolo da resistência e da diversidade étnica no Brasil. Ouça sua história, clicando no player abaixo.`,
+                linkDrive: "https://drive.google.com/file/d/1X--rN-PQWfRd2iSV86F6_iSm2kGuxGom/view?usp=drive_link"
+            },
+            {
+                nome: "Luiz Gama",
+                turma: "Entrevistado pelo 8º ano B",
+                imagem: "https://upload.wikimedia.org/wikipedia/commons/6/63/Luiz_Gama.jpg?utm_source=pt.wikipedia.org&utm_campaign=index&utm_content=original",
+                texto: `Nascido livre e vendido aos 10 anos como escravizado pelo próprio pai, Luiz Gama alfabetizou-se aos 17 anos e tornou-se um brilhante advogado autodidata, provando e garantindo a sua liberdade, se tornando também jornalista, poeta e um grande nome do movimento abolicionista do Brasil. Ele usou as leis da época para libertar mais de 500 pessoas escravizadas nos tribunais. Ouça sua história, através da entrevista realizada pelo 8B com Kauan, Matheus, Heloysa, Guilherme e Beatriz, clicando no player abaixo.`,
+                linkDrive: "https://drive.google.com/file/d/1fVXTAMRw3jvfegDAR-ug4NVbYerDpl4y/view?usp=drive_link"
+            },
+            {
+                nome: "Rosa Parks",
+                turma: "Entrevistado pelo 8º ano A",
+                imagem: "https://upload.wikimedia.org/wikipedia/commons/8/82/Rosa_Parks_%2813270402093%29_%28cropped%29.jpg?utm_source=pt.wikipedia.org&utm_campaign=imageinfo&utm_content=original",
+                texto: `Rosa Parks foi uma ativista negra norte-americana que enfrentou a segregação racial nos Estados Unidos e se tornou símbolo da resistência contra o racismo e da luta pelos direitos civis e pela igualdade. Ouça sua história, através da entrevista realizada pelo 8A com Thaisa, Maria Clara, Helloysa e Núria,clicando no player abaixo.`,
+                linkDrive: "https://drive.google.com/file/d/1L_2GJSu6x8sEPckDwADUdxVQYYzVug7r/view?usp=drive_link"
+            },
+            {
+                nome: "Martin Luther King",
+                turma: "Entrevistado pelo 8º ano A",
+                imagem: "https://upload.wikimedia.org/wikipedia/commons/0/05/Martin_Luther_King%2C_Jr..jpg?utm_source=pt.wikipedia.org&utm_campaign=index&utm_content=original",
+                texto: `Martin Luther King Jr. foi um líder negro norte-americano que lutou contra a segregação racial e pelos direitos civis, defendendo a igualdade e a resistência ao racismo por meio da ação não violenta. Ouça sua história, através da entrevista realizada pelo 8C com Melissa, Bianca, Yasmin e Heloisa, clicando no player abaixo.`,
+                linkDrive: "https://drive.google.com/file/d/1Fw2Ce_2-1MuGjfGpAgogaeaW2tgLMZVs/view?usp=drive_link"
+            }
+        ];
+
+        /* ================= SISTEMA DO SITE ================= */
+        
+        const grid = document.getElementById('grid-cards');
+        const modal = document.getElementById('modal');
+        const audioPlayer = document.getElementById('modal-audio');
+
+        // Função que converte o link do Drive para o mini-player iframe
+        function converterLinkDrive(link) {
+            if (!link || link === "COLE_O_LINK_DO_DRIVE_AQUI") return "";
+            
+            const match = link.match(/\/d\/(.+?)\//);
+            if (match && match[1]) {
+                const idArquivo = match[1];
+                return `https://drive.google.com/file/d/${idArquivo}/preview`;
+            }
+            return link; 
+        }
+
+        // Renderiza os cards na tela
+        personalidades.forEach((pessoa, index) => {
+            const card = document.createElement('div');
+            card.className = 'card';
+            card.onclick = () => abrirModal(index);
+            
+            card.innerHTML = `
+                <img src="${pessoa.imagem}" alt="${pessoa.nome}">
+                <h3 class="card-nome">${pessoa.nome}</h3>
+                <p class="card-turma">${pessoa.turma}</p>
+            `;
+            grid.appendChild(card);
+        });
+
+        function abrirModal(index) {
+            const pessoa = personalidades[index];
+            
+            document.getElementById('modal-img').src = pessoa.imagem;
+            document.getElementById('modal-titulo').innerText = pessoa.nome;
+            document.getElementById('modal-texto').innerText = pessoa.texto; 
+            
+            const urlAudio = converterLinkDrive(pessoa.linkDrive);
+            audioPlayer.src = urlAudio;
+            
+            modal.style.display = 'flex';
+        }
+
+        function fecharModal() {
+            modal.style.display = 'none';
+            audioPlayer.src = ""; // Desliga o áudio imediatamente ao fechar a janela
+        }
+
+        // Fecha a modal se clicar fora da caixinha branca
+        window.onclick = function(event) {
+            if (event.target == modal) {
+                fecharModal();
+            }
+        }
+    </script>
+</body>
+</html>
